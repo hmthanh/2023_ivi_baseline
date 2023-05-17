@@ -28,6 +28,12 @@ def load_metadata(metadata, participant):
     with open(metadata, "r") as f:
         # NOTE: The first line contains the csv header so we skip it
         for i, line in enumerate(f.readlines()[1:]):
+            # trn_2023_v0_000	8	finger_excl	1	finger_incl
+            #   fname : trn_2023_v0_000
+            #   main_speaker_id : 8
+            #   main_has_finger : finger_incl | finger_excl
+            #   ilocutor_speaker_id : 1
+            #   ilocutor_has_finger : finger_incl | finger_excl
             (
                 fname,
                 main_speaker_id,
