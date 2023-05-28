@@ -59,8 +59,8 @@ def load_metadata(metadata, participant):
     finger_info = np.array(finger_info)
     num_speakers = np.unique(speaker_ids).shape[0]
     # assert num_speakers == spks.max(), "Error speaker info!"
-    # print("Number of speakers: ", num_speakers)
-    # print("Has Finger Ratio:", np.mean(finger_info))
+    print("Number of speakers: ", num_speakers)
+    print("Has Finger Ratio:", np.mean(finger_info))
 
     return num_speakers, metadict_byfname, metadict_byindex
 

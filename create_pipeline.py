@@ -31,7 +31,7 @@ if __name__ == "__main__":
         ('cnst', ConstantsRemover_withroot()),
         ('np', Numpyfier()),
     ])
-    
+
     fullexpdata = mexp_full.fit_transform([parsed_example])[0]
 
     mexp_upperbody = Pipeline([
@@ -52,7 +52,6 @@ if __name__ == "__main__":
         ('np', Numpyfier()),
     ])
     upperexpdata = mexp_upperbody.fit_transform([parsed_example])[0]
-    
+
     jl.dump(mexp_full, "pipeline_expmap_full.sav")
     jl.dump(mexp_upperbody, "pipeline_expmap_upper.sav")
-    
