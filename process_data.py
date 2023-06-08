@@ -313,8 +313,9 @@ def prepare_h5_unclipped_test(metadata, word2vector, h5file="tst_v0.h5"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dataset_path", type=str, default="genea2023_dataset")
-    parser.add_argument("-w", "--word_emb_path", type=str, default="word_embedding.vec")
+    parser.add_argument("-d", "--dataset_path", type=str, default="./input/genea2023_dataset")
+    parser.add_argument("-w", "--word_emb_path", type=str, default="./input/word_embedding/crawl-300d-2M.vec")
+    parser.add_argument("-o", "--output_path", type=str, default="./output/data")
     args = parser.parse_args()
 
     word2vector = load_wordvectors(fname=args.word_emb_path)
@@ -325,13 +326,13 @@ if __name__ == "__main__":
     tsvdir = os.path.join(dataroot, "tsv")
     bvhdir = os.path.join(dataroot, "bvh")
 
-    prepare_h5_unclipped(dataroot, f"{dataset_type}_main-agent_v0.h5", "main-agent", word2vector)
-    prepare_h5_unclipped(dataroot, f"{dataset_type}_interloctr_v0.h5", "interloctr", word2vector)
+    prepare_h5_unclipped(dataroot, f"{args.output_path}/{dataset_type}_main-agent_v0.h5", "main-agent", word2vector)
+    prepare_h5_unclipped(dataroot, f"{args.output_path}/{dataset_type}_interloctr_v0.h5", "interloctr", word2vector)
 
     dataset_type = "val"
     dataroot = os.path.join(args.dataset_path, dataset_type)
-    prepare_h5_unclipped(dataroot, f"{dataset_type}_main-agent_v0.h5", "main-agent", word2vector)
-    prepare_h5_unclipped(dataroot, f"{dataset_type}_interloctr_v0.h5", "interloctr", word2vector)
+    prepare_h5_unclipped(dataroot, f"{args.output_path}/{dataset_type}_main-agent_v0.h5", "main-agent", word2vector)
+    prepare_h5_unclipped(dataroot, f"{args.output_path}/{dataset_type}_interloctr_v0.h5", "interloctr", word2vector)
 
     # dataset_type = "tst"
     # dataroot = os.path.join(args.dataset_path, dataset_type)

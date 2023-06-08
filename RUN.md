@@ -5,7 +5,7 @@
 ### 1.1. Data Preprocessing
 
 ```bash
-python process_data.py -d ./input/genea2023_dataset -w ./input/word_embedding/crawl-300d-2M.vec
+python process_data.py -d ./input/genea2023_dataset -w ./input/word_embedding/crawl-300d-2M.vec -o ./output/data
 ```
 
 The above script generates the following four h5 files under the project directory:
