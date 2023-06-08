@@ -152,3 +152,9 @@ resource/
 
 GENEA_visualizer-minimal-v1/
 vid/
+
+# Dataset and word embedding vector
+crawl-300d-2M/*
+genea2023_dataset/*
+genea2023_dataset/*/**
+
