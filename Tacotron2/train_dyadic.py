@@ -3,7 +3,6 @@ import time
 import math
 import h5py
 import numpy as np
-
 import torch
 from common.model import Tacotron2
 from common.logger import Tacotron2Logger
@@ -11,40 +10,35 @@ from common.hparams_dyadic import create_hparams
 from torch.utils.data import DataLoader
 from common.loss_function import Tacotron2Loss
 
+
 def load_h5(h5_data, motion_dim, audio_stats):
     """Return the data for each modality in the given h5 file as separate lists."""
     h5_data_len = len(h5_data.keys())
     ### Normalized audio feature
-    mel        = [(h5_data[str(i)]["audio"]["melspectrogram"][:] - audio_stats["mel_mean"]) / audio_stats["mel_std"]
-                    for i in range(h5_data_len)]
-    mfcc       = [(h5_data[str(i)]["audio"]["mfcc"][:] - audio_stats["mfcc_mean"]) / audio_stats["mfcc_std"]
-                    for i in range(h5_data_len)]
-    prosody    = [(h5_data[str(i)]["audio"]["prosody"][:] - audio_stats["prosody_mean"]) / audio_stats["prosody_std"]
-                    for i in range(h5_data_len)]
-    
+    mel = [(h5_data[str(i)]["audio"]["melspectrogram"][:] - audio_stats["mel_mean"]) / audio_stats["mel_std"] for i in range(h5_data_len)]
+    mfcc = [(h5_data[str(i)]["audio"]["mfcc"][:] - audio_stats["mfcc_mean"]) / audio_stats["mfcc_std"] for i in range(h5_data_len)]
+    prosody = [(h5_data[str(i)]["audio"]["prosody"][:] - audio_stats["prosody_mean"]) / audio_stats["prosody_std"] for i in range(h5_data_len)]
+
     speaker_id = [h5_data[str(i)]["speaker_id"][:] for i in range(h5_data_len)]
-    text       = [h5_data[str(i)]["text"][:] for i in range(h5_data_len)]
+    text = [h5_data[str(i)]["text"][:] for i in range(h5_data_len)]
     if motion_dim == 57:
-        motion = [h5_data[str(i)]["motion"]["expmap_upper"][:, :]
-                    for i in range(h5_data_len)]
+        motion = [h5_data[str(i)]["motion"]["expmap_upper"][:, :] for i in range(h5_data_len)]
     else:
-        motion = [h5_data[str(i)]["motion"]["expmap_full"][:, :]
-                    for i in range(h5_data_len)]
-    
+        motion = [h5_data[str(i)]["motion"]["expmap_full"][:, :] for i in range(h5_data_len)]
+
     return mel, mfcc, prosody, speaker_id, text, motion
 
+
 class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
-    def __init__(self, trn_h5file_main=None, trn_h5file_iloctr=None, 
-                       val_h5file_main=None, val_h5file_iloctr=None,
-                       sequence_length=300, npy_root="..", motion_dim=78):
-        
+    def __init__(self, trn_h5file_main=None, trn_h5file_iloctr=None, val_h5file_main=None, val_h5file_iloctr=None, sequence_length=300, npy_root="..", motion_dim=78):
+
         if trn_h5file_main is None and val_h5file_main is None:
             print("Both h5 files are not specified.")
             exit()
 
         assert (trn_h5file_main is None) == (trn_h5file_iloctr is None), "one side of the trn dataset is missing"
         assert (val_h5file_main is None) == (val_h5file_iloctr is None), "one side of the val dataset is missing"
-        
+
         mel_mean = np.load(os.path.join(npy_root, "mel_mean.npy"))
         mel_std = np.load(os.path.join(npy_root, "mel_std.npy"))
         mfcc_mean = np.load(os.path.join(npy_root, "mfcc_mean.npy"))
@@ -53,25 +47,24 @@ class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
         prosody_std = np.load(os.path.join(npy_root, "prosody_std.npy"))
 
         audio_stats_dict = {
-            "mel_mean" : mel_mean,
-            "mel_std" : mel_std,
-            "mfcc_mean" : mfcc_mean,
-            "mfcc_std" : mfcc_std,
-            "prosody_mean" : prosody_mean,
+            "mel_mean"    : mel_mean,
+            "mel_std"     : mel_std,
+            "mfcc_mean"   : mfcc_mean,
+            "mfcc_std"    : mfcc_std,
+            "prosody_mean": prosody_mean,
             "prosody_std" : prosody_std
         }
-        
+
         self.mel, self.mfcc, self.prosody, self.speaker_id, self.text, self.motion = [], [], [], [], [], []
         self.mel_interlocutor, self.mfcc_interlocutor, self.prosody_interlocutor, \
             self.speaker_id_interlocutor, self.text_interlocutor, self.motion_interlocutor = [], [], [], [], [], []
 
-
         if trn_h5file_main is not None:
             self.h5_main = h5py.File(trn_h5file_main, "r")
             self.h5_iloc = h5py.File(trn_h5file_iloctr, "r")
-            
+
             assert len(self.h5_main.keys()) == len(self.h5_iloc.keys()), "main-agent and interlocutor trn data have different number of files"
-            self.len = len(self.h5_main.keys())            
+            self.len = len(self.h5_main.keys())
             mel_main, mfcc_main, prosody_main, speaker_id_main, text_main, motion_main = load_h5(self.h5_main, motion_dim, audio_stats_dict)
             self.mel += mel_main
             self.mfcc += mfcc_main
@@ -79,7 +72,7 @@ class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
             self.speaker_id += speaker_id_main
             self.text += text_main
             self.motion += motion_main
-            
+
             mel_iloc, mfcc_iloc, prosody_iloc, speaker_id_iloc, text_iloc, motion_iloc = load_h5(self.h5_iloc, motion_dim, audio_stats_dict)
             self.mel_interlocutor += mel_iloc
             self.mfcc_interlocutor += mfcc_iloc
@@ -87,15 +80,15 @@ class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
             self.speaker_id_interlocutor += speaker_id_iloc
             self.text_interlocutor += text_iloc
             self.motion_interlocutor += motion_iloc
-            
+
             self.h5_main.close()
             self.h5_iloc.close()
-            
+
         if val_h5file_main is not None:
             self.h5_main = h5py.File(val_h5file_main, "r")
-            self.h5_iloc = h5py.File(val_h5file_iloctr, "r")            
+            self.h5_iloc = h5py.File(val_h5file_iloctr, "r")
             assert len(self.h5_main.keys()) == len(self.h5_iloc.keys()), "main-agent and interlocutor val data have different number of files"
-            self.len = len(self.h5_main.keys())            
+            self.len = len(self.h5_main.keys())
             mel_main, mfcc_main, prosody_main, speaker_id_main, text_main, motion_main = load_h5(self.h5_main, motion_dim, audio_stats_dict)
             self.mel += mel_main
             self.mfcc += mfcc_main
@@ -103,7 +96,7 @@ class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
             self.speaker_id += speaker_id_main
             self.text += text_main
             self.motion += motion_main
-            
+
             mel_iloc, mfcc_iloc, prosody_iloc, speaker_id_iloc, text_iloc, motion_iloc = load_h5(self.h5_iloc, motion_dim, audio_stats_dict)
             self.mel_interlocutor += mel_iloc
             self.mfcc_interlocutor += mfcc_iloc
@@ -111,7 +104,7 @@ class SpeechGestureDataset_Dyadic(torch.utils.data.Dataset):
             self.speaker_id_interlocutor += speaker_id_iloc
             self.text_interlocutor += text_iloc
             self.motion_interlocutor += motion_iloc
-            
+
             self.h5_main.close()
             self.h5_iloc.close()
 
@@ -188,7 +181,7 @@ class SpeechGestureDataset_Dyadic_ValSequence(SpeechGestureDataset_Dyadic):
 
         gesture = self.motion[idx][:total_frame_len]
         gesture = torch.FloatTensor(gesture).transpose(0, 1)
-        gate = torch.zeros([total_frame_len,])
+        gate = torch.zeros([total_frame_len, ])
         gate[-1] = 1
         length = torch.LongTensor([total_frame_len])
 
@@ -212,11 +205,11 @@ class SpeechGestureDataset_Dyadic_ValSequence(SpeechGestureDataset_Dyadic):
         return x, length, gesture, gate, length
 
 
-
 class RandomSampler(torch.utils.data.Sampler):
     def __init__(self, min_id, max_id):
         self.min_id = min_id
         self.max_id = max_id
+
     def __iter__(self):
         while True:
             yield np.random.randint(self.min_id, self.max_id)
@@ -226,23 +219,23 @@ class SequentialSampler(torch.utils.data.Sampler):
     def __init__(self, min_id, max_id):
         self.min_id = min_id
         self.max_id = max_id
+
     def __iter__(self):
         return iter(range(self.min_id, self.max_id))
-
 
 
 def prepare_dataloaders(hparams):
     # Get data, data loaders and collate function ready
     print("Loading dataset into memory ...")
     dataset = SpeechGestureDataset_Dyadic(
-                    "../trn_main-agent_v0.h5", "../trn_interloctr_v0.h5",
-                    None, None,
-                    motion_dim=hparams.n_acoustic_feat_dims)
-    
+        "../trn_main-agent_v0.h5", "../trn_interloctr_v0.h5",
+        None, None,
+        motion_dim=hparams.n_acoustic_feat_dims)
+
     val_dataset = SpeechGestureDataset_Dyadic_ValSequence(
-                    val_h5file_main="../val_main-agent_v0.h5",
-                    val_h5file_iloctr="../val_interloctr_v0.h5",
-                    motion_dim=hparams.n_acoustic_feat_dims)
+        val_h5file_main="../val_main-agent_v0.h5",
+        val_h5file_iloctr="../val_interloctr_v0.h5",
+        motion_dim=hparams.n_acoustic_feat_dims)
 
     train_loader = DataLoader(dataset, num_workers=0,
                               sampler=RandomSampler(0, len(dataset)),
@@ -290,16 +283,16 @@ def load_checkpoint(checkpoint_path, model, optimizer):
     optimizer.load_state_dict(checkpoint_dict['optimizer'])
     learning_rate = checkpoint_dict['learning_rate']
     iteration = checkpoint_dict['iteration']
-    print("Loaded checkpoint '{}' from iteration {}" .format(
+    print("Loaded checkpoint '{}' from iteration {}".format(
         checkpoint_path, iteration))
     return model, optimizer, learning_rate, iteration
 
 
 def save_checkpoint(model, optimizer, learning_rate, iteration, filepath):
     print("Saving model and optimizer state at iteration {} to {}".format(iteration, filepath))
-    torch.save({'iteration': iteration,
-                'state_dict': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
+    torch.save({'iteration'    : iteration,
+                'state_dict'   : model.state_dict(),
+                'optimizer'    : optimizer.state_dict(),
                 'learning_rate': learning_rate}, filepath)
 
 
@@ -314,7 +307,7 @@ def validate(model, criterion, val_loader, iteration, logger, teacher_prob):
             loss = criterion(y_pred, y)
             reduced_val_loss = loss.item()
             val_loss += reduced_val_loss
-            print("Iteration {} ValLoss {:.6f}  ".format(i, val_loss/(i+1)), end="\r")
+            print("Iteration {} ValLoss {:.6f}  ".format(i, val_loss / (i + 1)), end="\r")
             if i + 1 == 39:
                 break
         val_loss = val_loss / (i + 1)
@@ -326,7 +319,6 @@ def validate(model, criterion, val_loader, iteration, logger, teacher_prob):
 
 def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
           hparams):
-
     os.makedirs(os.path.join(hparams.output_directory, "ckpt"), exist_ok=True)
 
     torch.manual_seed(hparams.seed)
@@ -336,7 +328,6 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
     learning_rate = hparams.learning_rate
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=hparams.weight_decay)
 
-
     criterion = Tacotron2Loss(hparams.mel_weight, hparams.gate_weight, hparams.vel_weight, hparams.pos_weight, hparams.add_l1_losss)
     logger = prepare_directories_and_logger(output_directory, log_directory)
 
@@ -345,7 +336,7 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
     # Load checkpoint if one exists
     iteration = 0
     if checkpoint_path:
-        if warm_start: # set to False
+        if warm_start:  # set to False
             model = warm_start_model(checkpoint_path, model)
         else:
             model, optimizer, _learning_rate, iteration = load_checkpoint(checkpoint_path, model, optimizer)
@@ -376,13 +367,13 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
         optimizer.step()
 
         iters_from_last_save = iteration % hparams.iters_per_checkpoint + 1
-        running_loss = reduced_loss/iters_from_last_save
+        running_loss = reduced_loss / iters_from_last_save
 
         if not math.isnan(reduced_loss):
             duration += time.perf_counter() - start
             print("Iteration: {} Loss: {:.6f} Teacher: {:.8f} {:.2f}s/it              "
-                  "".format(iteration + 1, running_loss, teacher_prob, duration/iters_from_last_save), end="\r")
-            logger.log_training(running_loss, learning_rate, duration/iters_from_last_save, iteration + 1)
+                  "".format(iteration + 1, running_loss, teacher_prob, duration / iters_from_last_save), end="\r")
+            logger.log_training(running_loss, learning_rate, duration / iters_from_last_save, iteration + 1)
 
         if (iteration + 1) % hparams.iters_per_checkpoint == 0:
             print()

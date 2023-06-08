@@ -314,7 +314,7 @@ def prepare_h5_unclipped_test(metadata, word2vector, h5file="tst_v0.h5"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--dataset_path", type=str, default="genea2023_dataset")
-    parser.add_argument("-w", "--word_emb_path", type=str, default="crawl-300d-2M.vec")
+    parser.add_argument("-w", "--word_emb_path", type=str, default="word_embedding.vec")
     args = parser.parse_args()
 
     word2vector = load_wordvectors(fname=args.word_emb_path)

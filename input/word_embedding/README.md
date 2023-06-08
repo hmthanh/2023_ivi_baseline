@@ -6,7 +6,7 @@ Download from
 
 ```bash
 wget https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip
-unzip crawl-300d-2M.vec.zip
-rm crawl-300d-2M.vec.zip
+unzip word_embedding.vec.zip
+rm word_embedding.vec.zip
 ```
 
