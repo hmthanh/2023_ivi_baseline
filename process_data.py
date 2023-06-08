@@ -42,7 +42,7 @@ def load_metadata(metadata, participant):
             else:
                 has_finger = (ilocutor_has_finger == "finger_incl")
                 speaker_id = int(ilocutor_speaker_id) - 1
-            
+
             finger_info.append(has_finger)
             speaker_ids.append(speaker_id)
 
@@ -127,7 +127,7 @@ def load_tsv(tsvfile):
             end = float(end)
 
             if start - offset > .05 and i > 0:
-                if sentence[-1][1] - sentence[0][0] > .2: # if duration is long enough
+                if sentence[-1][1] - sentence[0][0] > .2:  # if duration is long enough
                     sentences.append(sentence)
                 sentence = [[start, end, raw_word]]
             else:
@@ -163,8 +163,8 @@ def find_timestamp_from_timings(timestamp, timings):
 
 
 def prepare_h5_unclipped(dataroot, h5file, participant, word2vector):
-    assert participant in ("main-agent", "interloctr"), "`participant` must be either 'main-agent' or 'interloctr'"    
-    
+    assert participant in ("main-agent", "interloctr"), "`participant` must be either 'main-agent' or 'interloctr'"
+
     metadata_path = os.path.join(dataroot, "metadata.csv")
     num_speakers, metadict_byfname, metadict_byindex = load_metadata(metadata_path, participant)
     filenames = sorted(metadict_byfname.keys())
@@ -172,7 +172,7 @@ def prepare_h5_unclipped(dataroot, h5file, participant, word2vector):
     wavdir = os.path.join(dataroot, participant, "wav")
     tsvdir = os.path.join(dataroot, participant, "tsv")
     bvhdir = os.path.join(dataroot, participant, "bvh")
-    
+
     with h5py.File(h5file, "w") as h5:
         for i, filename in enumerate(filenames):
             print("{}/{} {}              ".format(i + 1, len(filenames), filename), end="\r")
@@ -231,8 +231,8 @@ def prepare_h5_unclipped(dataroot, h5file, participant, word2vector):
                     for j, w in enumerate(ww):
                         vector = word2vector.get(w)
                         if vector is not None:
-                            ss = start_frame + int(subword_duration*j)
-                            ee = start_frame + int(subword_duration*(j+1))
+                            ss = start_frame + int(subword_duration * j)
+                            ee = start_frame + int(subword_duration * (j + 1))
                             textfeatures[ss:ee, :300] = vector
                 else:
                     vector = word2vector.get(word)
@@ -311,7 +311,6 @@ def prepare_h5_unclipped_test(metadata, word2vector, h5file="tst_v0.h5"):
     return
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--dataset_path", type=str, default="genea2023_dataset")
@@ -325,7 +324,7 @@ if __name__ == "__main__":
     wavdir = os.path.join(dataroot, "wav")
     tsvdir = os.path.join(dataroot, "tsv")
     bvhdir = os.path.join(dataroot, "bvh")
-    
+
     prepare_h5_unclipped(dataroot, f"{dataset_type}_main-agent_v0.h5", "main-agent", word2vector)
     prepare_h5_unclipped(dataroot, f"{dataset_type}_interloctr_v0.h5", "interloctr", word2vector)
 
