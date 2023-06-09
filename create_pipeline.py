@@ -1,13 +1,8 @@
-import os
-import numpy as np
+import joblib as jl
+from sklearn.pipeline import Pipeline
+
 from pymo.parsers import *
 from pymo.preprocessing import *
-from pymo.viz_tools import *
-from pymo.writers import *
-from sklearn.pipeline import Pipeline
-import joblib as jl
-import argparse
-
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()
@@ -53,6 +48,6 @@ if __name__ == "__main__":
     ])
     upperexpdata = mexp_upperbody.fit_transform([parsed_example])[0]
     
-    jl.dump(mexp_full, "pipeline_expmap_full.sav")
-    jl.dump(mexp_upperbody, "pipeline_expmap_upper.sav")
+    jl.dump(mexp_full, "./output/data/pipeline_expmap_full.sav")
+    jl.dump(mexp_upperbody, "./output/data/pipeline_expmap_upper.sav")
     

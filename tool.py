@@ -16,8 +16,8 @@ import numpy as np
 import scipy
 
 NFFT = 4096
-MFCC_INPUTS = 40 # How many features we will store for each MFCC vector
-HOP_LENGTH = 1/30
+MFCC_INPUTS = 40  # How many features we will store for each MFCC vector
+HOP_LENGTH = 1 / 30
 DIM = 64
 
 
@@ -80,7 +80,6 @@ def create_bvh(filename, prediction, frame_time):
 
 
 def shorten(arr1, arr2, min_len=0):
-
     if min_len == 0:
         min_len = min(len(arr1), len(arr2))
 
@@ -98,7 +97,7 @@ def average(arr, n):
     Returns:
         resulting array
     """
-    end = n * int(len(arr)/n)
+    end = n * int(len(arr) / n)
     return np.mean(arr[:end].reshape(-1, n), 1)
 
 
@@ -111,18 +110,15 @@ def calculate_spectrogram(audio, sr):
         log spectrogram values
     """
 
-
     # Make stereo audio being mono
     if len(audio.shape) == 2:
         audio = (audio[:, 0] + audio[:, 1]) / 2
 
-    spectr = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=NFFT,
-                                            hop_length=int(HOP_LENGTH * sr),
-                                            n_mels=DIM)
+    spectr = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=NFFT, hop_length=int(HOP_LENGTH * sr), n_mels=DIM)
 
     # Shift into the log scale
     eps = 1e-10
-    log_spectr = np.log(abs(spectr)+eps)
+    log_spectr = np.log(abs(spectr) + eps)
 
     return np.transpose(log_spectr)
 
@@ -141,8 +137,8 @@ def calculate_mfcc(audio, sr):
         audio = (audio[:, 0] + audio[:, 1]) / 2
 
     # Calculate MFCC feature with the window frame it was designed for
-    input_vectors = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=MFCC_INPUTS, n_fft=NFFT, hop_length=int(HOP_LENGTH * sr),
-                                            n_mels=DIM)
+    input_vectors = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=MFCC_INPUTS, n_fft=NFFT,
+                                         hop_length=int(HOP_LENGTH * sr), n_mels=DIM)
 
     return input_vectors.transpose()
 
@@ -182,7 +178,7 @@ def extract_prosodic_features(audio_filename):
     pitch_der = pitch_der[:min_size]
 
     # Stack them all together
-    pros_feature = np.stack((energy, energy_der, pitch, pitch_der))#, pitch_ind))
+    pros_feature = np.stack((energy, energy_der, pitch, pitch_der))  # , pitch_ind))
 
     # And reshape
     pros_feature = np.transpose(pros_feature)
@@ -201,17 +197,13 @@ def compute_prosody(audio_filename, time_step=0.05):
     times = np.arange(0, audio.get_total_duration() - time_step, time_step)
 
     # Compute prosodic features at each time step
-    pitch_values = np.nan_to_num(
-        np.asarray([pitch.get_value_at_time(t) for t in times]))
-    intensity_values = np.nan_to_num(
-        np.asarray([intensity.get_value(t) for t in times]))
+    pitch_values = np.nan_to_num(np.asarray([pitch.get_value_at_time(t) for t in times]))
+    intensity_values = np.nan_to_num(np.asarray([intensity.get_value(t) for t in times]))
 
-    intensity_values = np.clip(
-        intensity_values, np.finfo(intensity_values.dtype).eps, None)
+    intensity_values = np.clip(intensity_values, np.finfo(intensity_values.dtype).eps, None)
 
     # Normalize features [Chiu '11]
     pitch_norm = np.clip(np.log(pitch_values + 1) - 4, 0, None)
     intensity_norm = np.clip(np.log(intensity_values) - 3, 0, None)
 
     return pitch_norm, intensity_norm
-
