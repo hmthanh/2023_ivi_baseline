@@ -14,7 +14,7 @@ def create_hparams(**kwargs):
         "seed": 16807,
         "fp16_run": False,
         "cudnn_enabled": True,
-        "cudnn_benchmark": False,
+        "cudnn_benchmark": True,
         "output_directory": "monadic",  # Directory to save checkpoints.
         "log_directory": 'log',
         "checkpoint_path": '',

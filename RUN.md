@@ -55,7 +55,11 @@ output_directory
 ## 3. Testing the Model
 
 ```bash
-python generate_all_gestures.py -ch <checkpoint_path> -t full
+python generate_all_gestures.py -ch ./monadic/ckpt/checkpoint_10000.pt -t full
+```
+
+```bash
+python generate_all_dyadic_gestures.py -ch ./dyadic/ckpt/checkpoint_8000.pt -t full
 ```
 
 ## 4. Visualization
@@ -63,3 +67,11 @@ python generate_all_gestures.py -ch <checkpoint_path> -t full
 ```bash
 blender -b --python "<path to 'blender_render_2023.py' script>" -- -i1 "<path to main agent BVH file>" -i2 "<path to interlocutor BVH file>" -a1 "<path to main agent WAV file>" -a2 "<path to interlocutor WAV file>" -v -d 600 -o <directory to save MP4 video in> -m <visualization mode>
 ```
+
+
+## 5. Preprocess test data
+```bash
+python process_data.py -d ./input/genea2023_dataset -w ./input/word_embedding/crawl-300d-2M.vec -o ./output/data
+```
+
+

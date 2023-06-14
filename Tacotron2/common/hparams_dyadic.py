@@ -22,14 +22,13 @@ def create_hparams(**kwargs):
         "n_gpus": 1,  # Number of GPUs
         "device": 0,
 
-
         ################################
         # Model Parameters             #
         ################################
         "n_acoustic_feat_dims": 78,
         # "n_symbols": 387,
         # "n_symbols": 427,
-        "n_symbols": 932, # 427 * 2 + 78
+        "n_symbols": 932,  # 427 * 2 + 78
         # "n_symbols": 5816,
         "symbols_embedding_dim": 512,
 
@@ -88,5 +87,3 @@ def create_hparams(**kwargs):
     hparams_view = HParamsView(hparams)
 
     return hparams_view
-
-
